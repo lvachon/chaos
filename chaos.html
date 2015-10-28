@@ -1,0 +1,91 @@
+<html>
+<head>
+<script>
+var polySides = 3;
+var polyRad = 450;
+var cvs,ctx;
+var width,height;
+var shape = [];
+var points = [];
+var doRun=false;
+var iter=0;
+function init(){
+	
+	shape=[];
+	points=[];
+	iter=0;
+	cvs = document.getElementById("ctx");
+	ctx=cvs.getContext('2d');
+	width=cvs.width;
+	height=cvs.height;
+	polyRad=Math.min(width,height)*0.45;
+	var x,y;
+	polySides = 1.0*document.getElementById("sides").value;
+	if(polySides<3){polySides=3;}
+	for(var i=0;i<polySides;i++){
+		x = width/2 + polyRad*Math.cos(2*Math.PI*i/polySides-Math.PI/2);
+		y = height/2 + polyRad*Math.sin(2*Math.PI*i/polySides-Math.PI/2);
+		shape[i]=new Point(x,y);
+	}
+	curPoint = new Point(Math.random()*polyRad+width/2-polyRad/2,Math.random()*polyRad+height/2-polyRad/2);
+	ctx.fillStyle="#FFFFFF";
+	ctx.fillRect(0,0,width,height);
+	
+	ctx.beginPath();
+	ctx.strokeStyle="#000000";
+	ctx.moveTo(shape[0].x,shape[0].y);
+	for(var i = 1;i<shape.length;i++){
+		ctx.lineTo(shape[i].x,shape[i].y);
+	}
+	ctx.lineTo(shape[0].x,shape[0].y);
+	ctx.stroke();
+	
+	ctx.fillStyle="rgba(0,0,0,0.15)";
+}
+function Point(xx,yy){
+	this.x = xx;
+	this.y = yy;
+	this.draw = function(){
+		ctx.fillRect(this.x,this.y,1,1);
+	}
+}
+
+function midPoint(p1,p2){
+	return new Point((p1.x+p2.x)/2,(p1.y+p2.y)/2);
+}
+
+function chaosStep(){
+	curPoint = midPoint(curPoint,shape[Math.floor(Math.random()*polySides)]);
+	//points.push(curPoint);
+	iter++;
+	curPoint.draw();
+	
+	if(doRun){
+		if(!(iter%1000)){
+			setTimeout('chaosStep()',0);
+			document.getElementById('status').innerHTML=iter;
+		}else{
+			if(iter<100000000000){
+				chaosStep();
+			}else{
+				doRun=false;
+				alert("done");
+			}
+		}
+	}
+}
+
+</script>
+</head>
+<body>
+	<canvas width='800' height='800' id='ctx'></canvas><br/>
+	Sides:<input type='text' id='sides' value='3'/>(Try different numbers for other patterns)
+	<input type='button' value='init' onclick='init();'/>
+	<input id='runbtn' type='button' value='compute' onclick='doRun=!doRun;if(doRun){iter=0;chaosStep();}'/>
+	<!--<input id='savebtn' type='button' value='Flatten' onclick='document.getElementById("outimg").src=cvs.toDataURL();'/>-->
+	<div id='status'></div>
+	<!--<img id='outimg'/>-->
+</body>
+<script>
+	
+</script>
